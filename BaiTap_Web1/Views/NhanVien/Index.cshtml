@@ -1,0 +1,236 @@
+﻿<style>
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    td, th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+
+    th:first-child,td:first-child {
+        border-left: none;
+    }
+
+    th:last-child,td:last-child {
+        border-right: none;
+    }
+
+    tr:nth-child(even) {
+        background-color: #dddddd;
+    }
+</style>
+@{
+    ViewBag.Title = "Danh sách nhân viên";
+    string page_url = Request["page"];
+    string keyword = Request["keyword"];
+    string limit = Request["limit"];
+    string orderBy = Request["orderBy"];
+    string orderDir = Request["orderDir"];
+    if (string.IsNullOrEmpty(limit))
+    {
+        limit = "2";
+    }
+    else
+    {
+        limit = Request.QueryString["limit"];
+    }
+    if (string.IsNullOrEmpty(page_url))
+    {
+        page_url = "1";
+    }
+    var totalRecord = ViewData["Total"];
+    var totalPage = double.Parse(totalRecord.ToString()) / int.Parse(limit);
+}
+
+<div class="container">
+    <input type="hidden" value="@page_url" id="page">
+    <input type="hidden" value="@keyword" id="search">
+    <input type="hidden" value="@limit" id="selectPage">
+    <input type="hidden" value="@orderBy" id="OrderBy">
+    <input type="hidden" value="@orderDir" id="OrderDir">
+    <div class="d-flex justify-content-between">
+        <select class="form-select form-inline-block" style="margin: 10px; outline: none;" aria-label="Default select example" onchange="selectPage(this.value)" name="limit" id="limit">
+            <option selected>Select Paginate:</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+        </select>
+        <form method="GET" action="" class="form-inline">
+            <div class="form-group">
+                <label for="orderBy">Tùy chọn:</label>
+                <select name="orderBy" id="orderBy" class="form-select form-inline-block" style="margin: 10px; outline: none;">
+                    <option selected>Sắp xếp theo:</option>
+                    <option value="MaNV">MaNV</option>
+                    <option value="TenNV">TenNV</option>
+                    <option value="ChucVu">ChucVu</option>
+                    <option value="QueQuan">QueQuan</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Sắp xếp theo:</label>
+                <select name="orderDir" id="orderDir" class="form-select form-inline-block" style="margin: 10px; outline: none;">
+                    <option selected>Kiểu sắp xếp:</option>
+                    <option value="asc">Tăng dần</option>
+                    <option value="desc">Giảm dần</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-right: 10px;">Lọc</button>
+        </form>
+        <form action="" method="GET" class="form-inline" style="margin: 10px;">
+            <div class="form-group">
+                <label for="keyword">Tìm kiếm:</label>
+                <input style="margin-left: 5px; border-top-right-radius: unset; border-bottom-right-radius: unset;" type="text" class="form-control" name="keyword" id="keyword" placeholder="Nhập từ khóa...">
+            </div>
+            <button style="border-top-left-radius: unset; border-bottom-left-radius: unset;" type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+        </form>
+    </div>
+    <table id="tbl_data">
+        <tr>
+            <td>    </td>
+        </tr>
+    </table>
+
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center m-3" id="paginate">
+            @if (totalPage > 1)
+            {
+                if (!string.IsNullOrEmpty(keyword))
+                {
+                    if (int.Parse(page_url) > 1)
+                    {
+                        <li class="page-item"><a class="page-link" href="/Nhanvien/Index?limit=@limit&keyword=@keyword&page=@(int.Parse(page_url)-1)"><i class="fa-solid fa-chevron-left"></i></a></li>
+                    }
+                    for (int i = 0; i < totalPage; i++)
+                    {
+                        if ((i + 1) == int.Parse(page_url))
+                        {
+                            <li class="page-item active"><a class="page-link " href="/Nhanvien/Index?limit=@limit&keyword=@keyword&page=@(i+1)">@(i+1)</a></li>
+                        }
+                        else
+                        {
+                            <li class="page-item"><a class="page-link" href="/Nhanvien/Index?limit=@limit&keyword=@keyword&page=@(i+1)">@(i+1)</a></li>
+                        }
+                    }
+                    if (int.Parse(page_url) < totalPage)
+                    {
+                        <li class="page-item"><a class="page-link" href="/Nhanvien/Index?limit=@limit&keyword=@keyword&page=@(int.Parse(page_url)+1)"><i class="fa-solid fa-chevron-right"></i></a></li>
+                    }
+                }
+
+                else
+                {
+                    if (int.Parse(page_url) > 1)
+                    {
+                        <li class="page-item"><a class="page-link" href="/Nhanvien/Index?limit=@limit&orderBy=@orderBy&orderDir=@orderDir&page=@(int.Parse(page_url)-1)"><i class="fa-solid fa-chevron-left"></i></a></li>
+                    }
+                    for (int i = 0; i < totalPage; i++)
+                    {
+                        if ((i + 1) == int.Parse(page_url))
+                        {
+                            <li class="page-item active"><a class="page-link " href="/Nhanvien/Index?limit=@limit&orderBy=@orderBy&orderDir=@orderDir&page=@(i+1)">@(i+1)</a></li>
+                        }
+                        else
+                        {
+                            <li class="page-item"><a class="page-link" href="/Nhanvien/Index?limit=@limit&orderBy=@orderBy&orderDir=@orderDir&page=@(i+1)">@(i+1)</a></li>
+                        }
+                    }
+                    if (int.Parse(page_url) < totalPage)
+                    {
+                        <li class="page-item"><a class="page-link" href="/Nhanvien/Index?limit=@limit&orderBy=@orderBy&orderDir=@orderDir&page=@(int.Parse(page_url)+1)"><i class="fa-solid fa-chevron-right"></i></a></li>
+                    }
+                }
+            }
+        </ul>
+    </nav>
+</div>
+<script>
+    function selectPage(val) {
+        if (val != "0") {
+            location.href = '/Nhanvien/index?limit=' + val;
+        }
+    }
+
+    function getList() {
+        var pageItem = $('#page').val();
+        var keyword = $('#search').val();
+        var limit = $('#selectPage').val();
+        var orderBy = $('#OrderBy').val();
+        var orderDir = $('#OrderDir').val();
+        $.ajax({
+            url: "/NhanVien/GetList",
+            method: "POST",
+            data: { pageItem: pageItem, keyword: keyword, limit: limit, orderBy: orderBy, orderDir: orderDir},
+            success: function (result) {
+                var obj = JSON.parse(result);
+                console.log(obj);
+                $('#tbl_data').html("\
+                    <thead>\
+                            <tr align='center'>\
+                                <th>Mã nhân viên</th>\
+                                <th>Tên nhân viên</th>\
+                                <th>Chức vụ</th>\
+                                <th> Quê quán</th>\
+                                <th>Ngày sinh</th>\
+                                <th>Giới tính</th>\
+                                <th>Thao tác</th>\
+                            </tr>\
+                        </thead>\
+                    <tbody id=\"tbl_data_printer\"></tbody>\
+                    ");
+                let htmlResult = "";
+
+                for (let i = 0; i < obj.length; i++) {
+                    htmlResult += "\
+                                <tr>\
+                                    <td class ='MaNV'>" + obj[i].MaNV + "</td>\
+                                    <td class='TenNV'>" + obj[i].TenNV + "</td>\
+                                    <td>" + obj[i].ChucVu + "</td>\
+                                    <td>" + obj[i].QueQuan + "</td>\
+                                    <td>" + obj[i].NgaySinh + "</td>\
+                                    <td>" + obj[i].GioiTinh + "</td>\
+                                    <td>\
+                                    <a href=\"/Nhanvien/Edit?id="+ obj[i].MaNV + "\"class=\"btn btn-primary mr-2\"><i class=\"fas fa-edit\"></i></a>\
+                                    <button onclick=\"Delete(this)\" class=\"btn btn-danger\"><i class=\"fas fa-trash\"></i></button>\
+                                    </td>\
+                                    ";
+                }
+                $('#tbl_data_printer').append(htmlResult);
+            }
+        }
+        )
+    }
+
+    function Delete(ele) {
+        var maNV = $(ele).parents("tr").find(".MaNV").text();
+        var tenNV = $(ele).parents("tr").find(".TenNV").text();
+        console.log(maNV);
+        if (confirm("Xác nhận xóa nhân viên:" + tenNV)) {
+            $.ajax({
+                url: "/Nhanvien/Delete",
+                method: "POST",
+                data: { maNV },
+                success: function (result, status, xhr) {
+                    let rs = JSON.parse(result);
+                    console.log(rs);
+                    if (rs.ErrCode == 1) {
+                        toastr.success(rs.Message);
+                        location.reload();
+                    }
+                    else {
+                        toastr.error(rs.Message);
+                    }
+                },
+                error: function () {
+                    toastr.error("Mất kết nối với máy chủ!");
+                }
+            });
+        }
+    }
+    $(function () {
+        getList();
+    });
+</script>
